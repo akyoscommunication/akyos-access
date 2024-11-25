@@ -10,14 +10,14 @@ use Extended\ACF\Fields\ButtonGroup;
 use Extended\ACF\Fields\Gallery;
 use Extended\ACF\Fields\WYSIWYGEditor;
 
-class TextImageAccess extends Block
+class TextImageInlineAccess extends Block
 {
     protected static function block(): GutenbergBlock
     {
         return (new GutenbergBlock())
-            ->setTitle('Texte et image - Access')
-            ->setName('text-image-access')
-            ->setDescription('Texte et image')
+            ->setTitle('Texte et images alignées - Access')
+            ->setName('text-image-inline-access')
+            ->setDescription('Texte et images alignées')
             ->setCategory('content');
     }
 
@@ -30,14 +30,15 @@ class TextImageAccess extends Block
             Gallery::make('Images', 'images')->maxFiles(2)->format('id'),
             ButtonGroup::make('Position du contenu', 'position')
                 ->choices([
-                    'default' => 'Image / Contenu',
-                    'reverse' => 'Contenu / Image'
-                ])->default('default'),
+                    'first' => 'Contenu / Image / Image',
+                    'second' => 'Image / Contenu / Image',
+                    'third' => 'Image / Image / Contenu'
+                ])->default('first'),
         ];
     }
 
     public function render()
     {
-        return view('blocks.text-image-access');
+        return view('blocks.text-image-inline-access');
     }
 }

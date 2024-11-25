@@ -1,10 +1,10 @@
 <?php
 
-namespace App\View\Components;
+namespace Akyos\Access\View\Components;
 
 use Illuminate\View\Component;
 
-class Button extends Component
+class ButtonAccess extends Component
 {
     public $appearance;
 

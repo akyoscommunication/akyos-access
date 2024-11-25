@@ -1,25 +1,23 @@
 <?php
 
-namespace App\View\Components;
+namespace Akyos\Access\View\Components;
 
 use Illuminate\View\Component;
 
-class PostAccess extends Component
+class ImageAccess extends Component
 {
-    public \WP_Post $post;
+    public $lg;
+    public $sm;
 
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($post = null)
+    public function __construct($lg = null, $sm = null)
     {
-        if ($post instanceof \WP_Post) {
-            $this->post = $post;
-        } else {
-            $this->post = get_post($post);
-        }
+        $this->lg = $lg;
+        $this->sm = $sm;
     }
 
     /**
@@ -29,7 +27,6 @@ class PostAccess extends Component
      */
     public function render()
     {
-        return view('components.post');
+        return view('components.image');
     }
 }
-

@@ -39,7 +39,7 @@ class ServicesAccess extends Block
                     Image::make('Icône', 'icon')->format('id'),
                     Textarea::make('Description', 'description')->maxLength(200),
                     Link::make('Lien', 'link')
-                ])
+                ])->layout('block')
         ];
     }
 

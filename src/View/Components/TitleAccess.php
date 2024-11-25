@@ -19,6 +19,6 @@ class TitleAccess extends Component
 
     public function render()
     {
-        return view('components.title-access');
+        return view('components.title');
     }
 }

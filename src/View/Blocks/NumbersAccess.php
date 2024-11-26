@@ -2,6 +2,7 @@
 
 namespace Akyos\Access\View\Blocks;
 
+use Akyos\Access\Acf\Fields\ButtonAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
@@ -32,7 +33,8 @@ class NumbersAccess extends Block
                     Image::make('Image', 'image')->format('id'),
                     Text::make('Nombre', 'number'),
                     Textarea::make('Description', 'description')
-                ])
+                ]),
+            ButtonAccess::make('Bouton', 'button')
         ];
     }
 

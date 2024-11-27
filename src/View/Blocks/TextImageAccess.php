@@ -8,6 +8,7 @@ use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
 use Extended\ACF\Fields\ButtonGroup;
 use Extended\ACF\Fields\Gallery;
+use Extended\ACF\Fields\Tab;
 use Extended\ACF\Fields\WYSIWYGEditor;
 
 class TextImageAccess extends Block
@@ -24,10 +25,13 @@ class TextImageAccess extends Block
     protected static function fields(): array
     {
         return [
+            Tab::make('Générale', 'generale'),
             TitleAccess::make('Titre', 'title'),
             WYSIWYGEditor::make('Texte', 'content'),
             ButtonAccess::make('Bouton', 'button'),
+            Tab::make('Images', 'images_tab'),
             Gallery::make('Images', 'images')->maxFiles(2)->format('id'),
+            Tab::make('Options', 'options'),
             ButtonGroup::make('Position du contenu', 'position')
                 ->choices([
                     'default' => 'Image / Contenu',

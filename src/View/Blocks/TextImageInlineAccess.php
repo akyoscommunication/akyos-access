@@ -25,6 +25,7 @@ class TextImageInlineAccess extends Block
     protected static function fields(): array
     {
         return [
+            Tab::make('Générale', 'generale'),
             TitleAccess::make('Titre', 'title'),
             WYSIWYGEditor::make('Texte', 'content'),
             ButtonAccess::make('Bouton', 'button'),

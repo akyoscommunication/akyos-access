@@ -34,8 +34,8 @@ class TextImageAccess extends Block
             Tab::make('Options', 'options'),
             ButtonGroup::make('Position du contenu', 'position')
                 ->choices([
-                    'default' => 'Image / Contenu',
-                    'reverse' => 'Contenu / Image'
+                    'default' => 'Contenu / Image',
+                    'reverse' => 'Image / Contenu'
                 ])->default('default'),
         ];
     }

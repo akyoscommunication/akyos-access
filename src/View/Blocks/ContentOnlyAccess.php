@@ -11,7 +11,7 @@ class ContentOnlyAccess extends Block
     protected static function block(): GutenbergBlock
     {
         return (new GutenbergBlock())
-            ->setTitle('Contenu seul')
+            ->setTitle('Contenu seul- Access')
             ->setName('content-only-access')
             ->setCategory('content')
             ->setDescription('Bloque pour mettre du contenu');

@@ -16,7 +16,7 @@ class TextImageInlineAccess extends Block
     protected static function block(): GutenbergBlock
     {
         return (new GutenbergBlock())
-            ->setTitle('Texte et images alignées - Access')
+            ->setTitle('Texte et images 2 - Access')
             ->setName('text-image-inline-access')
             ->setDescription('Texte et images alignées')
             ->setCategory('content');
@@ -34,10 +34,9 @@ class TextImageInlineAccess extends Block
             Tab::make('Options', 'options'),
             ButtonGroup::make('Position du contenu', 'position')
                 ->choices([
-                    'first' => 'Contenu / Image / Image',
-                    'second' => 'Image / Contenu / Image',
-                    'third' => 'Image / Image / Contenu'
-                ])->default('first'),
+                    'default' => 'Contenu / Image',
+                    'reverse' => 'Image / Contenu'
+                ])->default('default'),
         ];
     }
 

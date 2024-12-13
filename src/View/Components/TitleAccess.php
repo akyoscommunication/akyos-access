@@ -7,12 +7,10 @@ use Illuminate\View\Component;
 class TitleAccess extends Component
 {
     public $tag;
-    public $position;
 
-    public function __construct($tag = 'h1', $position = 'left')
+    public function __construct($tag = 'h1')
     {
         $this->tag = $tag;
-        $this->position = $position;
     }
 
     public function render()

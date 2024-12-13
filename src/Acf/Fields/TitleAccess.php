@@ -19,7 +19,7 @@ class TitleAccess
                 'h2' => 'h2',
                 'h3' => 'h3',
             ]),
-            PositionAccess::make('Position', 'position')->default('left'),
+            //PositionAccess::make('Position', 'position')->default('left'),
         ])->layout($layout);
     }
 }

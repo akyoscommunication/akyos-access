@@ -32,7 +32,7 @@ class NumbersAccess extends Block
                 ->fields([
                     Image::make('Image', 'image')->format('id'),
                     Text::make('Nombre', 'number'),
-                    Textarea::make('Description', 'description')
+                    WYSIWYGEditor::make('Description', 'description')
                 ]),
             ButtonAccess::make('Bouton', 'button')
         ];

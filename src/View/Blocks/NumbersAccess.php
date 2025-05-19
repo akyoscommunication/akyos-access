@@ -33,6 +33,7 @@ class NumbersAccess extends Block
                     Image::make('Image', 'image')->format('id'),
                     Text::make('Préfixe','prefix'),
                     Text::make('Nombre', 'number'),
+                    Text::make('Suffixe','suffix'),
                     WYSIWYGEditor::make('Description', 'description')
                 ]),
             ButtonAccess::make('Bouton', 'button')

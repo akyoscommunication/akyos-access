@@ -36,7 +36,7 @@ class ServicesAccess extends Block
                 ->fields([
                     TitleAccess::make('Titre', 'title'),
                     Image::make('Image', 'image')->format('id'),
-                    Textarea::make('Description', 'description')->maxLength(200),
+                    Textarea::make('Description', 'description'),
                     Link::make('Lien', 'link')
                 ])->layout('block')->collapsed('title')
         ];

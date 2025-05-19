@@ -31,6 +31,7 @@ class NumbersAccess extends Block
             Repeater::make('Nombres', 'numbers')
                 ->fields([
                     Image::make('Image', 'image')->format('id'),
+                    Text::make('Préfixe','prefix'),
                     Text::make('Nombre', 'number'),
                     WYSIWYGEditor::make('Description', 'description')
                 ]),

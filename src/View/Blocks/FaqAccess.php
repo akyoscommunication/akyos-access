@@ -48,15 +48,25 @@ class FaqAccess extends Block
 
     public function data()
     {
-        $items = is_array($this->items ?? null) ? $this->items : [];
+        $this->description = self::formatRichText($this->description ?? '');
 
-        $this->items = array_values(array_filter($items, static function ($item): bool {
+        $items = is_array($this->items ?? null) ? $this->items : [];
+        $decoded = [];
+
+        foreach ($items as $item) {
             if (!is_array($item)) {
-                return false;
+                continue;
             }
 
-            $question = trim((string) ($item['question'] ?? ''));
-            $answer = trim(wp_strip_all_tags((string) ($item['answer'] ?? '')));
+            $decoded[] = [
+                'question' => self::decodeRichText($item['question'] ?? ''),
+                'answer' => self::formatRichText($item['answer'] ?? ''),
+            ];
+        }
+
+        $this->items = array_values(array_filter($decoded, static function (array $item): bool {
+            $question = trim($item['question']);
+            $answer = trim(wp_strip_all_tags($item['answer']));
 
             return $question !== '' && $answer !== '';
         }));
@@ -68,14 +78,63 @@ class FaqAccess extends Block
             'mainEntity' => array_map(static function (array $item): array {
                 return [
                     '@type' => 'Question',
-                    'name' => wp_strip_all_tags($item['question'] ?? ''),
+                    'name' => wp_strip_all_tags($item['question']),
                     'acceptedAnswer' => [
                         '@type' => 'Answer',
-                        'text' => wp_strip_all_tags($item['answer'] ?? ''),
+                        'text' => wp_strip_all_tags($item['answer']),
                     ],
                 ];
             }, $this->items),
         ];
+    }
+
+    /** Décode les séquences unicode du JSON de blocs Gutenberg (u003c → <). */
+    public static function decodeRichText(mixed $value): string
+    {
+        if (!is_string($value) || $value === '') {
+            return '';
+        }
+
+        $value = trim($value);
+
+        // WYSIWYG ACF : <p>u003cpu003e…u003c/pu003e</p>
+        if (preg_match('/^<p>(.+u003c.+)<\/p>$/s', $value, $match)) {
+            $value = $match[1];
+        }
+
+        $value = preg_replace_callback(
+            '/\\\\u([0-9a-fA-F]{4})/',
+            static fn (array $m): string => mb_convert_encoding(pack('H*', $m[1]), 'UTF-8', 'UCS-2BE'),
+            $value
+        );
+
+        $value = str_replace(
+            ['u003c', 'u003e', 'u0026', 'u0027', 'u0022', 'u00a0'],
+            ['<', '>', '&', "'", '"', ' '],
+            $value
+        );
+
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // ponytail: double <p> résiduel après décodage
+        $value = preg_replace('/^<p>\s*<p>/', '<p>', $value);
+        $value = preg_replace('/<\/p>\s*<\/p>$/', '</p>', $value);
+
+        return $value;
+    }
+
+    public static function formatRichText(mixed $value): string
+    {
+        $value = self::decodeRichText($value);
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/<(p|ul|ol|li|h[1-6]|blockquote|div|table)\b/i', $value)) {
+            return $value;
+        }
+
+        return wpautop($value);
     }
 
     public function render()

@@ -3,6 +3,7 @@
   'sm' => null,
   'md' => null,
   'variant' => 'image',
+  'rounded' => false,
 ])
 
 @php
@@ -25,7 +26,7 @@
     : new \Illuminate\View\ComponentAttributeBag();
 @endphp
 
-<picture {{ $htmlAttributes->merge(['class' => 'c-image']) }} @if($title !== '') tooltip="{{ $title }}" @endif>
+<picture {{ $htmlAttributes->merge(['class' => 'c-image']) }} @if($rounded) rounded @endif @if($title !== '') tooltip="{{ $title }}" @endif>
   @if($smUrl && $smUrl !== $fallback)
     <source media="(max-width: 700px)" srcset="{{ $smUrl }}">
   @endif

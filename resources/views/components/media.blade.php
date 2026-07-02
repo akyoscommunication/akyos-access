@@ -4,6 +4,7 @@
   'variant' => 'image',
   'sm' => null,
   'md' => null,
+  'rounded' => false,
 ])
 
 @php
@@ -23,6 +24,7 @@
     'sm' => $sm,
     'md' => $md,
     'variant' => $variant,
+    'rounded' => $rounded,
     'attributes' => $htmlAttributes,
   ])
 @elseif($normalized && $normalized['type'] === 'video')
@@ -50,6 +52,7 @@
     'sm' => $sm,
     'md' => $md,
     'variant' => $variant,
+    'rounded' => $rounded,
     'attributes' => $htmlAttributes,
   ])
 @endif

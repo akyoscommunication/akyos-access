@@ -175,6 +175,11 @@ class MediaHelper
     {
         $layout = $row['acf_fc_layout'] ?? '';
 
+        // Legacy : ID image à la place du nom de layout (migration Image → FlexibleContent)
+        if (is_numeric($layout)) {
+            return self::normalizeAttachmentId((int) $layout);
+        }
+
         return match ($layout) {
             'image' => self::normalizeImage((int) ($row['file'] ?? $row['image'] ?? 0))
                 ?? self::normalize($row['file'] ?? $row['image'] ?? null),

@@ -88,17 +88,67 @@ class MediaAccessBlockDataMigrator
      */
     public static function migratePostContent(string $content): array
     {
-        if (!function_exists('parse_blocks') || !function_exists('serialize_blocks')) {
+        return self::patchAcfBlocksInContent($content, static function (array $data, string $slug): array {
+            return self::migrateBlockData($data, $slug);
+        });
+    }
+
+    /**
+     * Répare les champs texte corrompus (u003c, u0026, rn…) après une migration serialize_blocks.
+     *
+     * @return array{content: string, blocks: int}
+     */
+    public static function repairPostContent(string $content): array
+    {
+        return self::patchAcfBlocksInContent($content, static function (array $data, string $slug): array {
+            $repaired = self::repairBlockDataStrings($data);
+
+            return [
+                'data' => $repaired['data'],
+                'changed' => $repaired['changed'],
+            ];
+        });
+    }
+
+    /**
+     * @param callable(array, string): array{data: array<string, mixed>, changed: bool} $patchBlockData
+     * @return array{content: string, blocks: int}
+     */
+    private static function patchAcfBlocksInContent(string $content, callable $patchBlockData): array
+    {
+        if (!str_contains($content, 'acf/')) {
             return ['content' => $content, 'blocks' => 0];
         }
 
-        $blocks = parse_blocks($content);
-        $count = self::migrateParsedBlocks($blocks);
+        $count = 0;
+        $newContent = preg_replace_callback(
+            '/<!--\s+wp:(?P<name>acf\/[\S]+)\s+(?P<attrs>{[\S\s]+?})\s+\/-->/',
+            static function (array $matches) use ($patchBlockData, &$count): string {
+                $name = $matches['name'];
+                $attrs = json_decode($matches['attrs'], true);
+                if (!is_array($attrs) || !isset($attrs['data']) || !is_array($attrs['data'])) {
+                    return $matches[0];
+                }
 
-        return [
-            'content' => $count > 0 ? serialize_blocks($blocks) : $content,
-            'blocks' => $count,
-        ];
+                $slug = substr($name, 4);
+                $result = $patchBlockData($attrs['data'], $slug);
+                if (!$result['changed']) {
+                    return $matches[0];
+                }
+
+                $count++;
+                $attrs['data'] = $result['data'];
+
+                return '<!-- wp:' . $name . ' ' . self::serializeBlockAttributes($attrs) . ' /-->';
+            },
+            $content
+        );
+
+        if (!is_string($newContent)) {
+            return ['content' => $content, 'blocks' => 0];
+        }
+
+        return ['content' => $newContent, 'blocks' => $count];
     }
 
     /**
@@ -146,10 +196,7 @@ class MediaAccessBlockDataMigrator
                 continue;
             }
 
-            $save = wp_update_post([
-                'ID' => $id,
-                'post_content' => $result['content'],
-            ], true);
+            $save = self::savePostContent($id, $result['content']);
 
             if (is_wp_error($save)) {
                 $messages[] = sprintf('#%d %s : %s', $id, $title, $save->get_error_message());
@@ -165,6 +212,151 @@ class MediaAccessBlockDataMigrator
             'migrated_blocks' => $migratedBlocks,
             'messages' => $messages,
         ];
+    }
+
+    /**
+     * @param list<string> $postTypes
+     * @return array{updated_posts: int, repaired_blocks: int, messages: list<string>}
+     */
+    public static function repairPosts(
+        bool $dryRun = false,
+        ?int $postId = null,
+        array $postTypes = ['page', 'post']
+    ): array {
+        $query = [
+            'post_type' => $postTypes,
+            'post_status' => ['publish', 'draft', 'pending', 'future', 'private'],
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+        ];
+
+        if ($postId !== null && $postId > 0) {
+            $query['post__in'] = [$postId];
+        }
+
+        $postIds = function_exists('get_posts') ? get_posts($query) : [];
+        $updatedPosts = 0;
+        $repairedBlocks = 0;
+        $messages = [];
+
+        foreach ($postIds as $id) {
+            $content = (string) get_post_field('post_content', $id);
+            if ($content === '' || !str_contains($content, 'acf/')) {
+                continue;
+            }
+
+            $result = self::repairPostContent($content);
+            if ($result['blocks'] === 0) {
+                continue;
+            }
+
+            $repairedBlocks += $result['blocks'];
+            $title = function_exists('get_the_title') ? (get_the_title($id) ?: "(#{$id})") : "(#{$id})";
+
+            if ($dryRun) {
+                $messages[] = sprintf('[dry-run] #%d %s — %d bloc(s) à réparer', $id, $title, $result['blocks']);
+                $updatedPosts++;
+                continue;
+            }
+
+            $save = self::savePostContent($id, $result['content']);
+
+            if (is_wp_error($save)) {
+                $messages[] = sprintf('#%d %s : %s', $id, $title, $save->get_error_message());
+                continue;
+            }
+
+            $messages[] = sprintf('#%d %s — %d bloc(s) réparé(s)', $id, $title, $result['blocks']);
+            $updatedPosts++;
+        }
+
+        return [
+            'updated_posts' => $updatedPosts,
+            'repaired_blocks' => $repairedBlocks,
+            'messages' => $messages,
+        ];
+    }
+
+    /** @return int|\WP_Error */
+    private static function savePostContent(int $postId, string $content)
+    {
+        $hadAcfFilter = function_exists('acf_parse_save_blocks')
+            && has_filter('content_save_pre', 'acf_parse_save_blocks');
+
+        if ($hadAcfFilter) {
+            remove_filter('content_save_pre', 'acf_parse_save_blocks', 5);
+        }
+
+        $save = wp_update_post([
+            'ID' => $postId,
+            'post_content' => wp_slash($content),
+        ], true);
+
+        if ($hadAcfFilter) {
+            add_filter('content_save_pre', 'acf_parse_save_blocks', 5, 1);
+        }
+
+        return $save;
+    }
+
+    /** @param array<string, mixed> $attrs */
+    private static function serializeBlockAttributes(array $attrs): string
+    {
+        if (function_exists('acf_serialize_block_attributes')) {
+            return acf_serialize_block_attributes($attrs);
+        }
+
+        if (function_exists('serialize_block_attributes')) {
+            return serialize_block_attributes($attrs);
+        }
+
+        return (string) wp_json_encode($attrs, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * @return array{data: array<string, mixed>, changed: bool}
+     */
+    private static function repairBlockDataStrings(array $data): array
+    {
+        $changed = false;
+
+        foreach ($data as $key => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+
+            $repaired = self::repairCorruptedString($value);
+            if ($repaired !== $value) {
+                $data[$key] = $repaired;
+                $changed = true;
+            }
+        }
+
+        return ['data' => $data, 'changed' => $changed];
+    }
+
+    private static function repairCorruptedString(string $value): string
+    {
+        if (!preg_match('/(?<!\\\\)u00[0-9a-f]{2}/i', $value)) {
+            return $value;
+        }
+
+        $value = preg_replace_callback(
+            '/(?<!\\\\)u([0-9a-f]{4})/i',
+            static function (array $matches): string {
+                $codePoint = hexdec($matches[1]);
+
+                return $codePoint > 0 ? mb_chr($codePoint, 'UTF-8') : $matches[0];
+            },
+            $value
+        ) ?? $value;
+
+        if (str_contains($value, 'rn')) {
+            $value = str_replace('rnrn', "\n\n", $value);
+            $value = str_replace('rn', "\n", $value);
+        }
+
+        return $value;
     }
 
     /**

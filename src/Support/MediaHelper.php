@@ -110,6 +110,98 @@ class MediaHelper
         return array_fill(0, max(1, $minItems), self::emptySlot());
     }
 
+    public static function isFlexibleContent(mixed $value): bool
+    {
+        if (!is_array($value)) {
+            return false;
+        }
+
+        if (isset($value['acf_fc_layout'])) {
+            return true;
+        }
+
+        foreach ($value as $row) {
+            if (is_array($row) && isset($row['acf_fc_layout'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Convertit une valeur legacy (ID, galerie, attachment array) en layout MediaAccess.
+     *
+     * @return array{acf_fc_layout: string, file?: int, url?: string}|null
+     */
+    public static function toFlexibleLayout(mixed $value): ?array
+    {
+        if (self::isFlexibleContent($value)) {
+            if (isset($value['acf_fc_layout'])) {
+                return $value;
+            }
+
+            return is_array($value[0] ?? null) ? $value[0] : null;
+        }
+
+        if (is_numeric($value)) {
+            $id = (int) $value;
+
+            return $id > 0 ? ['acf_fc_layout' => 'image', 'file' => $id] : null;
+        }
+
+        $normalized = self::normalize($value);
+        if ($normalized === null) {
+            return null;
+        }
+
+        return match ($normalized['type']) {
+            'image' => ['acf_fc_layout' => 'image', 'file' => $normalized['id']],
+            'video' => ['acf_fc_layout' => 'video', 'file' => $normalized['id']],
+            'youtube' => ['acf_fc_layout' => 'youtube', 'url' => $normalized['url']],
+            default => null,
+        };
+    }
+
+    /** @return list<int> */
+    public static function extractAttachmentIds(mixed $value): array
+    {
+        if ($value === null || $value === false || $value === '' || $value === []) {
+            return [];
+        }
+
+        if (is_numeric($value)) {
+            return [(int) $value];
+        }
+
+        if (is_string($value)) {
+            if (str_contains($value, ',')) {
+                return array_values(array_filter(array_map('intval', explode(',', $value))));
+            }
+
+            return is_numeric($value) ? [(int) $value] : [];
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        if (isset($value['acf_fc_layout']) || self::isAttachmentArray($value)) {
+            $id = self::attachmentId($value);
+
+            return $id ? [$id] : [];
+        }
+
+        $ids = [];
+        foreach ($value as $item) {
+            foreach (self::extractAttachmentIds($item) as $id) {
+                $ids[] = $id;
+            }
+        }
+
+        return array_values(array_unique(array_filter($ids)));
+    }
+
     public static function normalize(mixed $value): ?array
     {
         if (is_array($value) && isset($value['__empty__'])) {

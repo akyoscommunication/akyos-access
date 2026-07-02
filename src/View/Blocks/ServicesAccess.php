@@ -3,10 +3,10 @@
 namespace Akyos\Access\View\Blocks;
 
 use Akyos\Access\Acf\Fields\ButtonAccess;
+use Akyos\Access\Acf\Fields\MediaAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
-use Extended\ACF\Fields\Image;
 use Extended\ACF\Fields\Link;
 use Extended\ACF\Fields\Repeater;
 use Extended\ACF\Fields\Tab;
@@ -35,7 +35,7 @@ class ServicesAccess extends Block
             Repeater::make('Services', 'services')
                 ->fields([
                     TitleAccess::make('Titre', 'title'),
-                    Image::make('Image', 'image')->format('id'),
+                    MediaAccess::make('Média', 'image'),
                     Textarea::make('Description', 'description')->newLines('br'),
                     Link::make('Lien', 'link')
                 ])->layout('block')->collapsed('title')

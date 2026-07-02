@@ -3,10 +3,10 @@
 namespace Akyos\Access\View\Blocks;
 
 use Akyos\Access\Acf\Fields\ButtonAccess;
+use Akyos\Access\Acf\Fields\MediaAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
-use Extended\ACF\Fields\Image;
 use Extended\ACF\Fields\Tab;
 use Extended\ACF\Fields\Textarea;
 
@@ -29,8 +29,8 @@ class HeroAccess extends Block
 			Textarea::make('Description', 'description')->newLines('br'),
 			ButtonAccess::make('Bouton', 'button'),
 
-			Tab::make('Image'),
-			Image::make('Image', 'image_background')->format('id'),
+			Tab::make('Média'),
+			MediaAccess::make('Média de fond', 'image_background'),
 		];
 	}
 

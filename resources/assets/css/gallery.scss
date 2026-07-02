@@ -1,0 +1,29 @@
+.s-gallery {
+  &-grid,
+  &-row {
+    > * {
+      min-width: 0;
+    }
+  }
+
+  .swiper-slide {
+    > * {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .s-gallery-item {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .c-image,
+  .c-media {
+    width: 100%;
+  }
+}

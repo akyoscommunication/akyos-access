@@ -2,10 +2,10 @@
 
 namespace Akyos\Access\View\Blocks;
 
+use Akyos\Access\Acf\Fields\MediaAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
-use Extended\ACF\Fields\Image;
 use Extended\ACF\Fields\Link;
 use Extended\ACF\Fields\Repeater;
 use Extended\ACF\Fields\WYSIWYGEditor;
@@ -28,7 +28,7 @@ class BannerAccess extends Block
             WYSIWYGEditor::make('Description', 'description'),
             Repeater::make('Elements', 'elements')
                 ->fields([
-                    Image::make('Image', 'image')->format('id'),
+                    MediaAccess::make('Média', 'image'),
                     Link::make('Lien', 'link'),
                 ])
         ];

@@ -3,10 +3,10 @@
 namespace Akyos\Access\View\Blocks;
 
 use Akyos\Access\Acf\Fields\ButtonAccess;
+use Akyos\Access\Acf\Fields\MediaAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
-use Extended\ACF\Fields\Image;
 use Extended\ACF\Fields\Repeater;
 use Extended\ACF\Fields\Text;
 use Extended\ACF\Fields\Textarea;
@@ -30,7 +30,7 @@ class NumbersAccess extends Block
             WYSIWYGEditor::make('Description', 'description'),
             Repeater::make('Nombres', 'numbers')
                 ->fields([
-                    Image::make('Image', 'image')->format('id'),
+                    MediaAccess::make('Média', 'image'),
                     Text::make('Préfixe','prefix'),
                     Text::make('Nombre', 'number'),
                     Text::make('Suffixe','suffix'),

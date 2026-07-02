@@ -2,10 +2,11 @@
 
 namespace Akyos\Access\View\Blocks;
 
+use Akyos\Access\Acf\Fields\MediaAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
+use Akyos\Access\Support\MediaHelper;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
-use Extended\ACF\Fields\Gallery;
 use Extended\ACF\Fields\WYSIWYGEditor;
 
 class GalleryAccess extends Block
@@ -24,8 +25,13 @@ class GalleryAccess extends Block
         return [
             TitleAccess::make('Titre', 'title'),
             WYSIWYGEditor::make('Description', 'description'),
-            Gallery::make('Galerie', 'gallery')->maxFiles(6)->format('id'),
+            MediaAccess::repeater('Galerie', 'gallery', 6),
         ];
+    }
+
+    public function data()
+    {
+        $this->gallery = MediaHelper::normalizeListWithPlaceholders($this->gallery ?? null, 6);
     }
 
     public function render()

@@ -3,11 +3,12 @@
 namespace Akyos\Access\View\Blocks;
 
 use Akyos\Access\Acf\Fields\ButtonAccess;
+use Akyos\Access\Acf\Fields\MediaAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
+use Akyos\Access\Support\MediaHelper;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
 use Extended\ACF\Fields\ButtonGroup;
-use Extended\ACF\Fields\Gallery;
 use Extended\ACF\Fields\Tab;
 use Extended\ACF\Fields\WYSIWYGEditor;
 
@@ -29,8 +30,8 @@ class TextImageInlineAccess extends Block
             TitleAccess::make('Titre', 'title'),
             WYSIWYGEditor::make('Texte', 'content'),
             ButtonAccess::make('Bouton', 'button'),
-            Tab::make('Images', 'images_tab'),
-            Gallery::make('Images', 'images')->maxFiles(2)->format('id'),
+            Tab::make('Médias', 'images_tab'),
+            MediaAccess::repeater('Médias', 'images', 2),
             Tab::make('Options', 'options'),
             ButtonGroup::make('Position du contenu', 'position')
                 ->choices([
@@ -38,6 +39,11 @@ class TextImageInlineAccess extends Block
                     'reverse' => 'Image / Contenu'
                 ])->default('default'),
         ];
+    }
+
+    public function data()
+    {
+        $this->images = MediaHelper::normalizeListWithPlaceholders($this->images ?? null, 2);
     }
 
     public function render()

@@ -4,6 +4,9 @@ namespace Akyos\Access\Support;
 
 class MediaHelper
 {
+    /** Props Blade à retirer des attributs HTML avant merge(). */
+    private const BLADE_PROPS = ['lg', 'sm', 'md', 'variant', 'rounded', 'media', 'cover', 'image'];
+
     /** Slot vide mais truthy pour @if($images[0]) dans les templates legacy. */
     public static function emptySlot(): array
     {
@@ -19,6 +22,45 @@ class MediaHelper
         }
 
         return null;
+    }
+
+    /**
+     * Récupère une prop passée par erreur dans $attributes (thème sans @props).
+     */
+    public static function bladeProp(mixed $value, mixed $attributes, string $key, mixed $default = null): mixed
+    {
+        if ($value !== null && $value !== '' && $value !== []) {
+            return $value;
+        }
+
+        if ($attributes instanceof \Illuminate\View\ComponentAttributeBag && $attributes->has($key)) {
+            return $attributes->get($key);
+        }
+
+        return $default;
+    }
+
+    /**
+     * Attributs HTML sûrs pour ComponentAttributeBag::merge() (pas de tableaux).
+     */
+    public static function htmlAttributes(mixed $attributes): \Illuminate\View\ComponentAttributeBag
+    {
+        $bag = $attributes instanceof \Illuminate\View\ComponentAttributeBag
+            ? $attributes
+            : new \Illuminate\View\ComponentAttributeBag();
+
+        $bag = $bag->except(self::BLADE_PROPS);
+
+        // ponytail: legacy thèmes sans @props — upgrade = wrapper image.blade.php du bundle
+        $filtered = [];
+        foreach ($bag->getAttributes() as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+                continue;
+            }
+            $filtered[$key] = $value;
+        }
+
+        return new \Illuminate\View\ComponentAttributeBag($filtered);
     }
 
     /** @return list<mixed> */

@@ -12,7 +12,14 @@
   use function Akyos\Core\Helpers\default_image_url;
   use function Akyos\Core\Helpers\attachment_image_html;
 
-  $variant = $variant ?? 'image';
+  $rawAttributes = $attributes ?? null;
+  $lg = MediaHelper::bladeProp($lg ?? null, $rawAttributes, 'lg');
+  $sm = MediaHelper::bladeProp($sm ?? null, $rawAttributes, 'sm');
+  $md = MediaHelper::bladeProp($md ?? null, $rawAttributes, 'md');
+  $variant = MediaHelper::bladeProp($variant ?? null, $rawAttributes, 'variant', 'image') ?? 'image';
+  $rounded = (bool) MediaHelper::bladeProp($rounded ?? null, $rawAttributes, 'rounded', false);
+  $htmlAttributes = MediaHelper::htmlAttributes($rawAttributes);
+
   $fallback = default_image_url($variant);
   $lgId = MediaHelper::attachmentId($lg);
   $smId = !empty($sm) ? MediaHelper::attachmentId($sm) : null;
@@ -21,9 +28,6 @@
   $smUrl = $smId ? attachment_image_url($smId, 'full', $variant) : null;
   $mdUrl = $mdId ? attachment_image_url($mdId, 'full', $variant) : null;
   $title = $lgId ? (string) get_the_title($lgId) : '';
-  $htmlAttributes = isset($attributes) && $attributes instanceof \Illuminate\View\ComponentAttributeBag
-    ? $attributes
-    : new \Illuminate\View\ComponentAttributeBag();
 @endphp
 
 <picture {{ $htmlAttributes->merge(['class' => 'c-image']) }} @if($rounded) rounded @endif @if($title !== '') tooltip="{{ $title }}" @endif>

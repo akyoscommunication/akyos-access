@@ -10,12 +10,14 @@
 @php
   use Akyos\Access\Support\MediaHelper;
 
+  $rawAttributes = $attributes ?? null;
+  $media = MediaHelper::bladeProp($media ?? null, $rawAttributes, 'media');
+  $cover = (bool) MediaHelper::bladeProp($cover ?? null, $rawAttributes, 'cover', false);
+  $variant = MediaHelper::bladeProp($variant ?? null, $rawAttributes, 'variant', 'image') ?? 'image';
+  $rounded = (bool) MediaHelper::bladeProp($rounded ?? null, $rawAttributes, 'rounded', false);
+  $htmlAttributes = MediaHelper::htmlAttributes($rawAttributes);
+
   $normalized = MediaHelper::normalize($media);
-  $cover = !empty($cover);
-  $variant = $variant ?? 'image';
-  $htmlAttributes = isset($attributes) && $attributes instanceof \Illuminate\View\ComponentAttributeBag
-    ? $attributes
-    : new \Illuminate\View\ComponentAttributeBag();
 @endphp
 
 @if($normalized && $normalized['type'] === 'image')

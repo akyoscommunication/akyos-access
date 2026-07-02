@@ -1,0 +1,25 @@
+// Mobile : 1re card à gauche, la suivante entrevoit à droite — sans overflow visible
+@media (max-width: 767px) {
+  .s-services-list-wrapper--peek:has(.c-card:nth-child(2)) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    grid-template-columns: unset !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: rem(16);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .c-card {
+      flex: 0 0 85% !important;
+      min-width: 0;
+      scroll-snap-align: start;
+    }
+  }
+}

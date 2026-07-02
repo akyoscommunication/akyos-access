@@ -12,6 +12,11 @@ use Extended\ACF\Fields\Select;
 
 class ButtonAccess
 {
+    public static function hasLink(mixed $button): bool
+    {
+        return is_array($button) && !empty($button['link']['url']);
+    }
+
     public static function make(string $label, string $id, $layout = 'table'): Group
     {
         return Group::make($label, $id)->fields([

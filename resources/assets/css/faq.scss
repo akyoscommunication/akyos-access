@@ -1,0 +1,44 @@
+.s-faq {
+  > .container > .c-title {
+    width: fit-content;
+  }
+
+  &__text {
+    margin-top: rem(16);
+    max-width: rem(720);
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &-list {
+    margin-top: clamp-calc(24px, 48px);
+    max-width: rem(820);
+  }
+
+  &-item {
+    border-bottom: 1px solid rgba(var(--aky-color-dark--rgb, 35, 35, 35), 0.12);
+
+    &:first-child {
+      border-top: 1px solid rgba(var(--aky-color-dark--rgb, 35, 35, 35), 0.12);
+    }
+
+    .c-accordion-trigger {
+      font-size: rem(20);
+      line-height: 1.35;
+      font-family: $font-family-title;
+      font-weight: 600;
+      gap: rem(16);
+      text-align: left;
+    }
+
+    .c-accordion-content {
+      padding-bottom: rem(24);
+    }
+  }
+
+  &-footer {
+    margin-top: rem(40);
+  }
+}

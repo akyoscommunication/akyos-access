@@ -1,0 +1,148 @@
+.s-reviews {
+  > .container > .c-title {
+    width: fit-content;
+  }
+
+  &__header {
+    margin-bottom: clamp-calc(16px, 32px);
+  }
+
+  &__text {
+    margin-top: rem(16);
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__aggregate {
+    margin-top: rem(16);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: rem(8);
+    font-weight: 600;
+  }
+
+  &__stars {
+    color: color(primary);
+    letter-spacing: 0.05em;
+  }
+
+  &__score {
+    font-size: rem(18);
+  }
+
+  &__count {
+    opacity: 0.7;
+    font-size: rem(14);
+    font-weight: 500;
+  }
+
+  &-list {
+    margin-top: rem(32);
+    position: relative;
+
+    .slider--reviews {
+      &-wrapper {
+        height: auto;
+      }
+
+      .swiper-slide {
+        display: flex;
+        height: auto;
+        align-items: flex-start;
+      }
+
+      .s-reviews-item {
+        width: 100%;
+        height: auto;
+      }
+    }
+  }
+
+  &-footer {
+    margin-top: rem(32);
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.s-reviews-item {
+  @extend %rounded;
+
+  display: flex;
+  gap: rem(16);
+  padding: rem(24);
+  background-color: color(secondary);
+  color: color(text-secondary);
+
+  &__avatar {
+    flex-shrink: 0;
+
+    img {
+      @extend %rounded;
+
+      display: block;
+      width: rem(64);
+      height: rem(64);
+      object-fit: cover;
+      border-radius: 50%;
+    }
+  }
+
+  &__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: rem(12);
+  }
+
+  &__stars {
+    display: flex;
+    gap: rem(2);
+    line-height: 1;
+  }
+
+  &__star {
+    color: rgba(var(--aky-color-text-secondary--rgb, 255, 255, 255), 0.25);
+    font-size: rem(18);
+
+    &.is-filled {
+      color: color(primary);
+    }
+  }
+
+  &__text {
+    margin: 0;
+    font-style: normal;
+    line-height: 1.6;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__meta {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: rem(8);
+    font-size: rem(14);
+    font-weight: 600;
+  }
+
+  &__author {
+    font-style: normal;
+  }
+
+  &__date {
+    opacity: 0.75;
+    font-weight: 500;
+
+    &:not(:first-child)::before {
+      content: '·';
+      margin-right: rem(8);
+    }
+  }
+}

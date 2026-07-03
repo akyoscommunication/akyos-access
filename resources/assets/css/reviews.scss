@@ -1,5 +1,6 @@
 .s-reviews {
-  > .container > .c-title {
+  > .container > .c-title,
+  &__header > .c-title {
     width: fit-content;
   }
 
@@ -57,6 +58,20 @@
       .s-reviews-item {
         width: 100%;
         height: auto;
+      }
+
+      .swiper-buttons {
+        .swiper-button-prev,
+        .swiper-button-next {
+          position: initial;
+          width: initial;
+          height: initial;
+          margin-top: initial;
+
+          &::after {
+            content: none;
+          }
+        }
       }
     }
   }

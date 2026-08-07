@@ -58,6 +58,11 @@ class ReviewsAccess extends Block
                 ->collapsed('author'),
 
             Tab::make('Options', 'options'),
+            Number::make('Note totale', 'aggregate_rating')
+                ->min(0)
+                ->max(5)
+                ->step(0.1)
+                ->helperText('Laisser vide pour calculer automatiquement la moyenne des avis affichés.'),
             TrueFalse::make('Afficher les étoiles Google', 'show_stars')
                 ->default(true),
             ButtonAccess::make('Bouton', 'button'),
@@ -100,10 +105,15 @@ class ReviewsAccess extends Block
         $this->reviews = $normalized;
         $this->show_stars = !isset($this->show_stars) || !empty($this->show_stars);
 
-        $ratings = array_filter(array_column($normalized, 'rating'));
-        $this->aggregate_rating = $ratings !== []
-            ? round(array_sum($ratings) / count($ratings), 1)
-            : null;
+        $manualAggregate = $this->aggregate_rating;
+        if ($manualAggregate !== null && $manualAggregate !== '') {
+            $this->aggregate_rating = round(max(0, min(5, (float) $manualAggregate)), 1);
+        } else {
+            $ratings = array_filter(array_column($normalized, 'rating'));
+            $this->aggregate_rating = $ratings !== []
+                ? round(array_sum($ratings) / count($ratings), 1)
+                : null;
+        }
 
         $this->schema = [
             '@context' => 'https://schema.org',

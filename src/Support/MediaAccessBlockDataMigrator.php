@@ -38,6 +38,9 @@ class MediaAccessBlockDataMigrator
         'gallery-access' => [
             ['kind' => 'gallery_to_repeater', 'field' => 'gallery', 'media' => 'media'],
         ],
+        'reviews-access' => [
+            ['kind' => 'repeater_flexible', 'repeater' => 'reviews', 'field' => 'photo'],
+        ],
     ];
 
     /** @var array<string, array<string, mixed>> */
@@ -464,7 +467,11 @@ class MediaAccessBlockDataMigrator
     ): array {
         $repeaterMeta = $fieldIndex[$field] ?? null;
         $mediaMeta = is_array($repeaterMeta) ? ($repeaterMeta['sub_fields'][$mediaField] ?? null) : null;
-        $ids = MediaHelper::extractAttachmentIds($data[$field] ?? null);
+        // ponytail: ACF stocke le compteur répéteur ("1") comme scalaire — extractAttachmentIds
+        // le prenait pour l'attachment #1 et écrasait les vrais IDs. Upgrade = tester le type gallery.
+        $ids = self::isAlreadyMediaRepeater($data, $field, $mediaField)
+            ? []
+            : MediaHelper::extractAttachmentIds($data[$field] ?? null);
 
         if ($ids !== []) {
             self::purgeKeys($data, $field);
@@ -502,6 +509,13 @@ class MediaAccessBlockDataMigrator
         }
 
         return ['data' => $data, 'changed' => $changed];
+    }
+
+    private static function isAlreadyMediaRepeater(array $data, string $field, string $mediaField): bool
+    {
+        return array_key_exists("{$field}_0_{$mediaField}", $data)
+            || array_key_exists("{$field}_0_{$mediaField}_0_file", $data)
+            || array_key_exists("{$field}_0_{$mediaField}_0_url", $data);
     }
 
     /**

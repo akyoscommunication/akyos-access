@@ -6,8 +6,9 @@ use Akyos\Access\Acf\Fields\ButtonAccess;
 use Akyos\Access\Acf\Fields\TitleAccess;
 use Akyos\Core\Classes\Block;
 use Akyos\Core\Classes\GutenbergBlock;
+use Akyos\Access\Acf\Fields\MediaAccess;
+use Akyos\Access\Support\MediaHelper;
 use Extended\ACF\Fields\DatePicker;
-use Extended\ACF\Fields\Image;
 use Extended\ACF\Fields\Message;
 use Extended\ACF\Fields\Number;
 use Extended\ACF\Fields\Repeater;
@@ -46,7 +47,7 @@ class ReviewsAccess extends Block
             Tab::make('Avis', 'reviews_tab'),
             Repeater::make('Avis', 'reviews')
                 ->fields([
-                    Image::make('Photo', 'photo')->format('id'),
+                    MediaAccess::make('Photo', 'photo'),
                     Text::make('Auteur', 'author'),
                     Number::make('Note', 'rating')->min(1)->max(5)->step(1),
                     DatePicker::make('Date', 'date')->displayFormat('d/m/Y')->format('Y-m-d'),
@@ -88,7 +89,8 @@ class ReviewsAccess extends Block
                 continue;
             }
 
-            $photoId = (int) ($item['photo'] ?? 0);
+            $photo = MediaHelper::normalize($item['photo'] ?? null);
+            $photoId = (($photo['type'] ?? '') === 'image') ? (int) $photo['id'] : 0;
             $rating = max(0, min(5, (int) ($item['rating'] ?? 0)));
 
             $normalized[] = [
@@ -105,7 +107,7 @@ class ReviewsAccess extends Block
         $this->reviews = $normalized;
         $this->show_stars = !isset($this->show_stars) || !empty($this->show_stars);
 
-        $manualAggregate = $this->aggregate_rating;
+        $manualAggregate = $this->aggregate_rating ?? null;
         if ($manualAggregate !== null && $manualAggregate !== '') {
             $this->aggregate_rating = round(max(0, min(5, (float) $manualAggregate)), 1);
         } else {
